@@ -23,7 +23,7 @@ GraphLibrary - библиотека для создания графов, у к�
 Применяет функцию f(std::shared_ptr<T>, Args...) к объекту класса в вершине. Функция обязана первым аргументом иметь std::shared_ptr<T>.
 
 
-### Пример использования класса:
+### [Пример](Examples/GraphExample.h) использования класса:
 ```c++
 Graph<int> g; // integer edge weights
 
@@ -55,3 +55,77 @@ std::cout << g.executeVertex<A, std::string, int>(0,
 // Hi! Hi! Hi!
 // I'm A with value 5
 ```
+
+## ```class SingleTypeGraph<weight_t, T>```
+Класс для графов с одинаковыми типами вершин. weight_t - тип весов ребер, T - тип вершин графа. Является наследником ```Graph```.
+
+### ```SingleTypeGraph(const std::vector<std::shared_ptr<T>>& vertexes, const std::vector<std::vector<weight_t>>& matrix)```
+Конструктор по матрице смежности. Чтобы отметить отсутствие ребра, нужно указать в качестве веса максимальный вес для ребер. Значения на диагонали не имеют значения.
+
+### ```SingleTypeGraph(const edges_t& edges, bool ordered=false)```
+Конструктор по списку ребер.
+
+### ```std::vector<ResultType> applyAll(CallbackType f, Args ...args)```
+Требования аналогичны требованиям ```executeVertex``` базового класса. Применяет функцию ко всем вершинам.
+
+### ```std::vector<ResultType> apply(const std::vector<size_t>& vertexes, CallbackType f, Args ...args)```
+Аналогично, применение к выбранным вершинам.
+
+### ```std::pair<size_t, size_t> addVertexes(const std::vector<std::shared_ptr<T>>& vertexes)```
+Добавление вектора вершин. Возвращает номер начала и конца(не включая) индексации новых вершин.
+
+
+### [Пример](Examples/GraphExample.h) использования класса:
+```c++
+SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in vertexes
+    SingleTypeGraph<int, A> g_from_edges;
+
+    std::shared_ptr<A> p1(new A(1));
+    std::shared_ptr<A> p2(new A(2));
+    std::shared_ptr<A> p3(new A(3));
+    std::shared_ptr<A> p4(new A(4));
+    std::shared_ptr<A> p5(new A(5));
+
+    std::vector<std::shared_ptr<A>> vertexes{p1, p2, p3, p4, p5};
+    int m = std::numeric_limits<int>::max();
+    std::vector<std::vector<int>> matrix{
+            {m, 9, m, 4, m},
+            {9, m, 4, m, 1},
+            {m, 4, m, m, 2},
+            {4, m, m, m, 3},
+            {m, 1, 2, 3, m}
+    };
+
+    using edges_t = std::vector<std::pair<std::pair<std::shared_ptr<A>, std::shared_ptr<A>>, int>>;
+    edges_t edges{
+            std::make_pair(std::make_pair(p1, p2), 9),
+            std::make_pair(std::make_pair(p2, p3), 4),
+            std::make_pair(std::make_pair(p1, p4), 4),
+            std::make_pair(std::make_pair(p5, p4), 3),
+            std::make_pair(std::make_pair(p2, p5), 1),
+            std::make_pair(std::make_pair(p3, p5), 2),
+    };
+
+
+    g_from_matrix.constructFromMatrix(vertexes, matrix);
+    g_from_edges.constructFromEdges(edges);
+
+    for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
+            assert(g_from_matrix.shortestPath(i, j).first == g_from_edges.shortestPath(i, j).first);
+
+    g_from_edges.applyAll<int, int>([](std::shared_ptr<A> p, int a) {p->foo(a); return 0;},17);
+    // I'm A with x, a:1 17
+    // I'm A with x, a:2 17
+    // I'm A with x, a:3 17
+    // I'm A with x, a:4 17
+    // I'm A with x, a:5 17
+```
+
+
+
+
+
+
+
+
