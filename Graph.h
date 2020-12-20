@@ -90,7 +90,7 @@ public:
     std::vector<ResultType> apply(const std::vector<size_t>& vertexes, CallbackType f, Args ...args) {
         std::vector<ResultType> res;
         for (auto i: vertexes) {
-            res.push_back(executeVertex<ResultType, Args..., CallbackType>(i, f, args...));
+            res.push_back(executeVertex<ResultType, Args...>(i, f, args...));
         }
         return res;
     }
