@@ -129,23 +129,26 @@ SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in verte
 
 
 ### [Пример](Examples/ChainResponsibility.h) использования цепочки ответственности:
+
+#### Класс прохождения уроня: если у тебя достаточный скилл, ты можешь пройти уровень и увеличить свой навык
 ```c++
 class Level {
 public:
-    explicit Level(int level, int bonus): level(level), bonus(bonus){};
+    explicit Level(int skill, int bonus): skill(skill), bonus(bonus){};
     bool check(int& hero) const {
-        if (hero < level) {
+        if (hero < skill) {
             return false;
         }
         hero += bonus;
         return true;
     }
 private:
-    int level;
+    int skill;
     int bonus;
 };
 ```
 
+#### Прохождение уровней по цепочке: в зависимости от начального скилла меняется уровень, до которого доходишь и конечный скилл:
 ```c++
 
 
@@ -168,15 +171,15 @@ edges_t edges{
 g.constructFromEdges(edges);
 
 size_t v = 0, w = 4;
-std::cout << "Level at the end, beginning from 1: " << g.applyChain(v, w, 1,
+std::cout << "Skill at the end, beginning from 1: " << g.applyChain(v, w, 1,
                                            [](std::shared_ptr<Level> p,
                                                    int& x){return p->check(x);}) << std::endl; // 5
 
-std::cout << "Level at the end, beginning from 5: " << g.applyChain(v, w, 5,
+std::cout << "Skill at the end, beginning from 5: " << g.applyChain(v, w, 5,
                                            [](std::shared_ptr<Level> p,
                                                    int& x){return p->check(x);}) << std::endl; // 9
 
-std::cout << "Level at the end, beginning from 8: " << g.applyChain(v, w, 8,
+std::cout << "Skill at the end, beginning from 8: " << g.applyChain(v, w, 8,
                                            [](std::shared_ptr<Level> p,
                                                    int& x){return p->check(x);}) << std::endl; // 19
 ```

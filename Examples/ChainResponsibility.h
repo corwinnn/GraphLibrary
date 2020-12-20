@@ -2,16 +2,16 @@
 
 class Level {
 public:
-    explicit Level(int level, int bonus): level(level), bonus(bonus){};
+    explicit Level(int skill, int bonus): skill(skill), bonus(bonus){};
     bool check(int& hero) const {
-        if (hero < level) {
+        if (hero < skill) {
             return false;
         }
         hero += bonus;
         return true;
     }
 private:
-    int level;
+    int skill;
     int bonus;
 };
 
