@@ -75,7 +75,7 @@ std::cout << g.executeVertex<A, std::string, int>(0,
 Добавление вектора вершин. Возвращает номер начала и конца(не включая) индексации новых вершин.
 
 
-### [Пример](Examples/GraphExample.h) использования класса:
+### [Пример](Examples/SingleTypeGraphExample.h) использования класса:
 ```c++
 SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in vertexes
     SingleTypeGraph<int, A> g_from_edges;

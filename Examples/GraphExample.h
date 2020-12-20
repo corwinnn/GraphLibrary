@@ -1,12 +1,6 @@
 #include "Inventory.h"
-#include "../Graph.h"
-#include <iostream>
-#include <unordered_map>
-#include <memory>
-#include <algorithm>
-#include<string>
 
-void differentVertexClasses() {
+void graphExample() {
     Graph<int> g; // integer edge weights
 
     std::shared_ptr<A> p1(new A(5));
