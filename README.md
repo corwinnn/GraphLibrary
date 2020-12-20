@@ -127,7 +127,7 @@ SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in verte
     // I'm A with x, a:5 17
 ```
 
-## ```class SuperGraph<weight_t, T>```
+## ```class SuperGraph<weight_t>```
 Класс, позволяющий использовать паттерн компоновщик. weight_t - тип весов ребер. Является наследником ```Graph```. Для использования требуется, чтобы каждый класс в вершине имел метод ```getCost()```.
 
 ### [Пример](Examples/CompositePattern.h) использования класса:
@@ -143,7 +143,7 @@ public:
     int beauty;
 };
 ```
-Найдем красоту Вселенной из галактик из звезд
+#### Найдем красоту Вселенной из галактик из звезд
 ```c++
 SuperGraph<int> orionConstellation;
 SuperGraph<int> geminiConstellation;
