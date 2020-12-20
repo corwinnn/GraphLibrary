@@ -1,25 +1,25 @@
 # GraphLibrary
 GraphLibrary - библиотека для создания графов, у которых вершинами могут являться сложные классы, а весами ребер выступать аддитивные линейно упорядоченные классы.
 
-## class Graph<weight_t>
+## ```class Graph<weight_t>```
 Общий класс для графов с разными типами вершин. weight_t - тип весов ребер.
 
-### Graph()
+### ```Graph()```
 Конструктор без параметров. Работает только для [интегральных](https://en.cppreference.com/w/cpp/types/is_integral) классов. Внутри конструктора инициализируется 0 типа(дефолтный конструктор weight_t) и максимум типа из numeric_limits.
 
-### Graph(weight_t max_value)
+### ```Graph(weight_t max_value)```
 Работает для всех типов, передается максимум типа(значение, превышающее вес любого пути в графе) как параметр.
 
-### size_t addVertex(std::shared_ptr<T> v)
+### ```size_t addVertex(std::shared_ptr<T> v)```
 Добавляет в граф вершину, возвращает ее номер. Номера выдаются в порядке добавления.
 
-### void addEdge(size_t v, size_t w, weight_t weight, bool oriented=true)
+### ```void addEdge(size_t v, size_t w, weight_t weight, bool oriented=true)```
 Добавляет в граф ребро между вершинами v и w(должны быть добавлены ранее в граф) с весом weight.
 
-### void remove(size_t i)
+### ```void remove(size_t i)```
 Удаляет вершину и все связанные с ней ребра.
 
-### ResultType executeVertex(size_t v, CallbackType f, Args ...args)
+### ```ResultType executeVertex(size_t v, CallbackType f, Args ...args)```
 Применяет функцию f(std::shared_ptr<T>, Args...) к объекту класса в вершине. Функция обязана первым аргументом иметь std::shared_ptr<T>.
 
 
