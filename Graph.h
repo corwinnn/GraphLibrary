@@ -188,8 +188,11 @@ void Graph<weight_t>::addEdge(size_t v, size_t w, weight_t weight, bool oriented
 
 template<class weight_t>
 std::pair<weight_t, std::vector<size_t>> Graph<weight_t>::shortestPath(size_t start, size_t finish) {
+    assert(indexes_.find(start) != indexes_.end() && "Vertex start should be added to Graph");
+    assert(indexes_.find(finish) != indexes_.end() && "Vertex finish should be added to Graph");
     size_t n = indexes_.size();
-    std::unordered_map<size_t, weight_t> distance, parents;
+    std::unordered_map<size_t, weight_t> distance;
+    std::unordered_map<size_t, size_t> parents;
     std::unordered_map<size_t, bool> used;
     for_each(indexes_.begin(), indexes_.end(),[&](auto ind) {distance[ind] = inf_;});
     distance[start] = zero_;
@@ -206,7 +209,7 @@ std::pair<weight_t, std::vector<size_t>> Graph<weight_t>::shortestPath(size_t st
         used[v] = true;
 
         for (auto& el: graph_[v]) {
-            int to = el.first;
+            size_t to = el.first;
             weight_t weight = el.second;
             if (distance[v] + weight < distance[to]) {
                 distance[to] = distance[v] + weight;
