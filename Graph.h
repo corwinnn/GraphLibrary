@@ -1,5 +1,6 @@
 #include<algorithm>
 #include<cassert>
+#include<experimental/type_traits>
 #include<iostream>
 #include<memory>
 #include<set>
@@ -112,16 +113,6 @@ public:
         size_t begin = this->vertex_index_;
         std::for_each(vertexes.begin(), vertexes.end(), [&](auto p) {addVertex(p);});
         return std::make_pair(begin, this->vertex_index_);
-    }
-
-    weight_t cost() {
-        weight_t ans = 0;
-        for (auto v: this->graph_) {
-            for (auto e: v.second) {
-                ans += e.second;
-            }
-        }
-        return ans;
     }
 };
 
@@ -252,3 +243,31 @@ void Graph<weight_t>::remove(size_t i) {
         }
     }
 }
+template<class T>
+using hasGetCost = decltype(std::declval<T&>().getCost());
+
+template<class weight_t>
+class SuperGraph: public Graph<weight_t> {
+public:
+    SuperGraph(): Graph<weight_t>(){};
+    SuperGraph(weight_t inf): Graph<weight_t>(inf){};
+    template<class T>
+    size_t addVertex(std::shared_ptr<T> v) {
+        static_assert(std::experimental::is_detected_exact_v<int, hasGetCost, T>, "Class should has the getCost() method");
+        std::shared_ptr<typename Graph<weight_t>::IVertex> ptr(new typename Graph<weight_t>::template Vertex<T>(v, this->vertex_index_));
+        this->v_map_[this->vertex_index_] = ptr;
+        this->indexes_.insert(this->vertex_index_);
+        costs[this->vertex_index_] = v->getCost();
+        return this->vertex_index_++;
+    }
+    int getCost() {
+        int ans = 0;
+        for(const auto& i: costs) {
+            ans += i.second;
+        }
+        return ans;
+    }
+private:
+    std::unordered_map<size_t, int> costs;
+
+};

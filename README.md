@@ -23,7 +23,7 @@ GraphLibrary - библиотека для создания графов, у к�
 Применяет функцию f(std::shared_ptr<T>, Args...) к объекту класса в вершине. Функция обязана первым аргументом иметь std::shared_ptr<T>.
 
 
-### [Пример](Examples/GraphExample.h) использования класса:
+### [Пример](Examples/DifferentTypeGraph.h) использования класса:
 ```c++
 Graph<int> g; // integer edge weights
 
@@ -80,7 +80,7 @@ std::cout << g.executeVertex<A, std::string, int>(0,
 Когда функция возвращает ```false```, цепочка возвращает текущий результат
 
 
-### [Пример](Examples/SingleTypeGraphExample.h) использования класса:
+### [Пример](Examples/SingleTypeGraph.h) использования класса:
 ```c++
 SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in vertexes
     SingleTypeGraph<int, A> g_from_edges;
@@ -127,6 +127,61 @@ SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in verte
     // I'm A with x, a:5 17
 ```
 
+## ```class SuperGraph<weight_t, T>```
+Класс, позволяющий использовать паттерн компоновщик. weight_t - тип весов ребер. Является наследником ```Graph```. Для использования требуется, чтобы каждый класс в вершине имел метод ```getCost()```.
+
+### [Пример](Examples/CompositePattern.h) использования класса:
+
+#### Создадим класс с требуемым методом
+```c++
+class Star {
+public:
+    explicit Star(int beauty): beauty(beauty){};
+    int getCost() const {
+        return beauty;
+    }
+    int beauty;
+};
+```
+Найдем красоту Вселенной из галактик из звезд
+```c++
+SuperGraph<int> orionConstellation;
+SuperGraph<int> geminiConstellation;
+SuperGraph<int> leoConstellation;
+SuperGraph<int> cassiopeiaConstellation;
+
+orionConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(1)));
+orionConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(2)));
+orionConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(13)));
+orionConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(5)));
+orionConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(17)));
+
+geminiConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(1)));
+geminiConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(2)));
+
+leoConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(1)));
+leoConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(8)));
+leoConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(11)));
+
+cassiopeiaConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(1)));
+cassiopeiaConstellation.addVertex<Star>(std::shared_ptr<Star> (new Star(4)));
+
+SuperGraph<int> milkyWayGalaxy;
+SuperGraph<int> andromedaGalaxy;
+
+milkyWayGalaxy.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(orionConstellation));
+milkyWayGalaxy.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(geminiConstellation));
+
+andromedaGalaxy.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(leoConstellation));
+andromedaGalaxy.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(cassiopeiaConstellation));
+
+SuperGraph<int> Universe;
+
+Universe.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(milkyWayGalaxy));
+Universe.addVertex<SuperGraph<int>>(std::make_shared<SuperGraph<int>>(andromedaGalaxy));
+
+std::cout << "Universe beauty: " << Universe.getCost() << std::endl; // 66
+```
 
 ### [Пример](Examples/ChainResponsibility.h) использования цепочки ответственности:
 

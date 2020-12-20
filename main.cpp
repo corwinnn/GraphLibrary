@@ -1,9 +1,10 @@
 #include <iostream>
 
-#include "Examples/GraphExample.h"
-#include "Examples/SingleTypeGraphExample.h"
+#include "Examples/DifferentTypeGraph.h"
+#include "Examples/SingleTypeGraph.h"
 #include "Examples/ChainResponsibility.h"
 #include "Examples/StringEdges.h"
+#include "Examples/CompositePattern.h"
 
 int main() {
     graphExample();
@@ -14,4 +15,5 @@ int main() {
     std::cout << "\n\n\n";
     stringEdges();
     std::cout << "\n\n\n";
+    composite();
 }
