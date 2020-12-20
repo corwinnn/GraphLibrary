@@ -1,11 +1,11 @@
-#include<iostream>
-#include<vector>
-#include<unordered_map>
-#include<set>
-#include<memory>
-#include<type_traits>
-#include<cassert>
 #include<algorithm>
+#include<cassert>
+#include<iostream>
+#include<memory>
+#include<set>
+#include<type_traits>
+#include<unordered_map>
+#include<vector>
 
 
 template<class weight_t>
@@ -23,7 +23,7 @@ public:
     template<class T>
     size_t addVertex(std::shared_ptr<T> v);
 
-    void addEdge(size_t v, size_t w, weight_t weight, bool oriented=true);
+    void addEdge(size_t v, size_t w, weight_t weight, bool oriented=false);
 
     std::pair<weight_t, std::vector<size_t>> shortestPath(size_t v, size_t w);
 
@@ -62,11 +62,12 @@ template<class weight_t, class T>
 class SingleTypeGraph: public Graph<weight_t> {
 public:
     SingleTypeGraph(): Graph<weight_t>(){};
+    SingleTypeGraph(weight_t max_value): Graph<weight_t>(max_value){};
 
-    SingleTypeGraph(const std::vector<std::shared_ptr<T>>& vertexes, const std::vector<std::vector<weight_t>>& matrix);
+    void constructFromMatrix(const std::vector<std::shared_ptr<T>>& vertexes, const std::vector<std::vector<weight_t>>& matrix);
 
     using edges_t = std::vector<std::pair<std::pair<std::shared_ptr<T>, std::shared_ptr<T>>, weight_t>>;
-    explicit SingleTypeGraph(const edges_t& edges, bool ordered=false);
+    void constructFromEdges(const edges_t& edges, bool oriented=false);
 
     size_t addVertex(std::shared_ptr<T> v) {
         return this->Graph<weight_t>::template addVertex<T>(v);
@@ -80,7 +81,7 @@ public:
     std::vector<ResultType> applyAll(CallbackType f, Args ...args) {
         std::vector<ResultType> res;
         for (auto i: this->indexes_) {
-            res.push_back(executeVertex<ResultType, Args..., CallbackType>(i->second, f, args...));
+            res.push_back(executeVertex<ResultType, Args...>(i, f, args...));
         }
         return res;
     }
@@ -112,40 +113,42 @@ public:
 };
 
 template<class weight_t, class T>
-SingleTypeGraph<weight_t, T>::SingleTypeGraph(const std::vector<std::shared_ptr<T>> &vertexes,
-                                              const std::vector<std::vector<weight_t>> &matrix): Graph<weight_t>() {
+void SingleTypeGraph<weight_t, T>::constructFromMatrix(const std::vector<std::shared_ptr<T>> &vertexes,
+                                              const std::vector<std::vector<weight_t>> &matrix) {
     size_t n = vertexes.size();
-    static_assert(n == matrix.size(), "Matrix length and width should match vector length");
-    for_each(matrix.begin(), matrix.end(), [&](auto& x) {static_assert(n == x.size(),
+    assert(n == matrix.size() && "Matrix length and width should match vector length");
+    for_each(matrix.begin(), matrix.end(), [&](auto& x) {assert(n == x.size() &&
                                                                        "Matrix length and width should match vector length");});
 
     addVertexes(vertexes);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            this->addEdge(i, j, false);
+            if (i != j && matrix[i][j] != this->inf_)
+                this->addEdge(i, j, matrix[i][j], true);
         }
     }
-
 }
 
 template<class weight_t, class T>
-SingleTypeGraph<weight_t, T>::SingleTypeGraph(const SingleTypeGraph::edges_t &edges, bool ordered): Graph<weight_t>() {
+void SingleTypeGraph<weight_t, T>::constructFromEdges(const SingleTypeGraph::edges_t &edges, bool oriented) {
     std::unordered_map<std::shared_ptr<T>, size_t> vertex2num;
     for(const auto& el: edges) {
         size_t left, right;
         auto it = vertex2num.find(el.first.first);
         if (it == vertex2num.end()) {
             left = this->addVertex(el.first.first);
+            vertex2num[el.first.first] = left;
         } else {
             left = it->second;
         }
         it = vertex2num.find(el.first.second);
         if (it == vertex2num.end()) {
             right = this->addVertex(el.first.second);
+            vertex2num[el.first.second] = right;
         } else {
             right = it->second;
         }
-        this->addEdge(left, right, el.second, ordered);
+        this->addEdge(left, right, el.second, oriented);
     }
 }
 
@@ -161,6 +164,9 @@ size_t Graph<weight_t>::addVertex(std::shared_ptr<T> v) {
 
 template<class weight_t>
 void Graph<weight_t>::addEdge(size_t v, size_t w, weight_t weight, bool oriented) {
+    assert(indexes_.find(v) != indexes_.end() && "Vertex v should be added to Graph before adding an edge");
+    assert(indexes_.find(w) != indexes_.end() && "Vertex w should be added to Graph before adding an edge");
+
     graph_[v].emplace_back(w, weight);
     if (!oriented) {
         graph_[w].emplace_back(v, weight);
