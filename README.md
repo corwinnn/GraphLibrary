@@ -74,6 +74,11 @@ std::cout << g.executeVertex<A, std::string, int>(0,
 ### ```std::pair<size_t, size_t> addVertexes(const std::vector<std::shared_ptr<T>>& vertexes)```
 Добавление вектора вершин. Возвращает номер начала и конца(не включая) индексации новых вершин.
 
+### ```ResultType applyChain(size_t start, size_t finish,  ResultType start_value, CallbackType f, Args ...args)```
+Применение действий по цепочке, изменяя результат в каждой вершине. Берется цепочка вершин кратчайшего пути между ```start``` и ```финиш```.
+По цепочке применяется функция сигнатуры ```std::shared_ptr<T>, ResultType&, Args...``` -> ```bool```, которая может изменять внутри себя переданный параметр.
+Когда функция возвращает ```false```, цепочка возвращает текущий результат
+
 
 ### [Пример](Examples/SingleTypeGraphExample.h) использования класса:
 ```c++
@@ -123,8 +128,55 @@ SingleTypeGraph<int, A> g_from_matrix; // integer edge weights, class A in verte
 ```
 
 
+### [Пример](Examples/ChainResponsibility.h) использования цепочки ответственности:
+```c++
+class Level {
+public:
+    explicit Level(int level, int bonus): level(level), bonus(bonus){};
+    bool check(int& hero) const {
+        if (hero < level) {
+            return false;
+        }
+        hero += bonus;
+        return true;
+    }
+private:
+    int level;
+    int bonus;
+};
 
+void chainResponsibility() {
 
+    SingleTypeGraph<int, Level> g;
+
+    std::shared_ptr<Level> p1(new Level(1, 1));
+    std::shared_ptr<Level> p2(new Level(2, 1));
+    std::shared_ptr<Level> p3(new Level(3, 2));
+    std::shared_ptr<Level> p4(new Level(10, 5));
+    std::shared_ptr<Level> p5(new Level(17, 2));
+
+    using edges_t = std::vector<std::pair<std::pair<std::shared_ptr<Level>, std::shared_ptr<Level>>, int>>;
+    edges_t edges{
+            std::make_pair(std::make_pair(p1, p2), 1),
+            std::make_pair(std::make_pair(p2, p3), 1),
+            std::make_pair(std::make_pair(p3, p4), 1),
+            std::make_pair(std::make_pair(p4, p5), 1),
+    };
+
+    g.constructFromEdges(edges);
+
+    size_t v = 0, w = 4;
+    std::cout << "Level at the end, beginning from 1: " << g.applyChain(v, w, 1,
+                                               [](std::shared_ptr<Level> p,
+                                                       int& x){return p->check(x);}) << std::endl; // 5
+
+    std::cout << "Level at the end, beginning from 5: " << g.applyChain(v, w, 5,
+                                               [](std::shared_ptr<Level> p,
+                                                       int& x){return p->check(x);}) << std::endl; // 9
+
+    std::cout << "Level at the end, beginning from 8: " << g.applyChain(v, w, 8,
+                                               [](std::shared_ptr<Level> p,
+```
 
 
 

@@ -95,6 +95,19 @@ public:
         return res;
     }
 
+    template <typename ResultType, typename ...Args, typename CallbackType = bool (*)(std::shared_ptr<T>, ResultType&, Args...)>
+    ResultType applyChain(size_t start, size_t finish,  ResultType start_value, CallbackType f, Args ...args) {
+        auto vertexes = this->shortestPath(start, finish).second;
+        ResultType res = start_value;
+        for (auto i: vertexes) {
+            auto v = std::dynamic_pointer_cast<typename Graph<weight_t>::template Vertex<T>>(this->v_map_[i])->holder_;
+            if (!f(v, res, args...)) {
+                return res;
+            }
+        }
+        return res;
+    }
+
     std::pair<size_t, size_t> addVertexes(const std::vector<std::shared_ptr<T>>& vertexes) {
         size_t begin = this->vertex_index_;
         std::for_each(vertexes.begin(), vertexes.end(), [&](auto p) {addVertex(p);});
